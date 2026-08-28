@@ -33,7 +33,7 @@ class FreeMobileApiAuthError(FreeMobileApiError):
 class FreeMobileApiMfaRequired(FreeMobileApiError):
     """A temporary SMS code is needed to complete login."""
 
-    def __init__(self, access_token: str, otp_id: str) -> None:
+    def __init__(self, access_token: str, otp_id: int) -> None:
         super().__init__("Free Mobile requires a temporary security code")
         self.access_token = access_token
         self.otp_id = otp_id
@@ -99,7 +99,7 @@ class FreeMobileMobileApiClient:
         # reliable indication that the user must supply an SMS code.
         otp_id = _otp_id(response)
         if _requires_mfa(response):
-            if not otp_id:
+            if otp_id is None:
                 raise FreeMobileApiError("Free Mobile requested SMS verification without a usable challenge identifier")
             raise FreeMobileApiMfaRequired(access_token, otp_id)
         self.auth_state.update(response)
@@ -108,7 +108,7 @@ class FreeMobileMobileApiClient:
         """Finish the temporary SMS challenge and mark this HA instance trusted."""
         response = await self._async_post_json(
             "/auth/otp",
-            {"codeOtp": code, "idOtp": challenge.otp_id, "isTrusted": True},
+            {"codeOtp": _otp_code(code), "idOtp": challenge.otp_id, "isTrusted": True},
             "MobAuthOTP",
             access_token=challenge.access_token,
         )
@@ -210,13 +210,22 @@ def _required_str(payload: dict[str, Any], key: str) -> str:
     return value
 
 
-def _otp_id(payload: dict[str, Any]) -> str | None:
+def _otp_id(payload: dict[str, Any]) -> int | None:
     """Accept the OTP field spellings observed across Free API versions."""
     for key in ("otpId", "idOtp", "otp_id", "id_otp", "challengeId"):
-        value = _as_str(payload.get(key))
-        if value:
+        value = payload.get(key)
+        if isinstance(value, int):
             return value
+        if isinstance(value, str) and value.isdigit():
+            return int(value)
     return None
+
+
+def _otp_code(value: str) -> int:
+    """Validate the code while matching the numeric payload used by the app."""
+    if not value.isdigit():
+        raise FreeMobileApiAuthError("The Free Mobile SMS code must contain digits only")
+    return int(value)
 
 
 def _requires_mfa(payload: dict[str, Any]) -> bool:

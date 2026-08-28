@@ -41,7 +41,7 @@ class FreeMobileApiAuthError(FreeMobileApiError):
 class FreeMobileApiMfaRequired(FreeMobileApiError):
     """Free Mobile requires a one-time SMS code before issuing final tokens."""
 
-    def __init__(self, access_token: str, otp_id: str) -> None:
+    def __init__(self, access_token: str, otp_id: int) -> None:
         super().__init__("Free Mobile requires a temporary security code.")
         self.access_token = access_token
         self.otp_id = otp_id
@@ -120,8 +120,8 @@ class FreeMobileMobileApiClient:
         access_token = _required_string(result, "accessToken")
         # Free currently includes type2FA in both challenge and trusted-device
         # responses.  otpId is the reliable signal that an SMS code is needed.
-        otp_id = _string_or_none(result.get("otpId"))
-        if otp_id:
+        otp_id = _integer_or_none(result.get("otpId"))
+        if otp_id is not None:
             raise FreeMobileApiMfaRequired(access_token, otp_id)
 
         self.state.update_tokens(result, username)
@@ -131,7 +131,7 @@ class FreeMobileMobileApiClient:
         """Complete an OTP challenge and persist the trusted-device response."""
         result = await self._async_post_json(
             "/auth/otp",
-            {"codeOtp": code, "idOtp": challenge.otp_id, "isTrusted": True},
+            {"codeOtp": _otp_code(code), "idOtp": challenge.otp_id, "isTrusted": True},
             service_label="MobAuthOTP",
             access_token=challenge.access_token,
         )
@@ -255,6 +255,20 @@ def _required_string(payload: dict[str, Any], name: str) -> str:
 
 def _string_or_none(value: Any) -> str | None:
     return value if isinstance(value, str) and value else None
+
+
+def _integer_or_none(value: Any) -> int | None:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    return None
+
+
+def _otp_code(value: str) -> int:
+    if not value.isdigit():
+        raise FreeMobileApiAuthError("The Free Mobile SMS code must contain digits only")
+    return int(value)
 
 
 def _login_from_token(token: str | None) -> str | None:
