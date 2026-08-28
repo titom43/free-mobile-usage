@@ -1,0 +1,71 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Free Mobile Usage",
+        "description": "Connecte le compte principal Free Mobile. Les lignes de la famille sont ajoutees automatiquement.",
+        "data": {
+          "username": "Identifiant Free Mobile",
+          "password": "Mot de passe Free Mobile"
+        }
+      },
+      "mfa": {
+        "title": "Verification Free Mobile",
+        "description": "Saisis le code temporaire recu par SMS. Home Assistant sera enregistre comme appareil approuve.",
+        "data": {
+          "code": "Code SMS"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Identifiants Free Mobile invalides.",
+      "invalid_mfa": "Code SMS Free Mobile invalide ou expire.",
+      "cannot_connect": "Connexion impossible a Free Mobile.",
+      "unknown": "Erreur inattendue. Consulte les logs Home Assistant."
+    },
+    "abort": {
+      "already_configured": "Ce compte Free Mobile est deja configure.",
+      "mfa_session_expired": "La session de verification a expire. Recommence la configuration."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "data_used": {
+        "name": "Data consommee"
+      },
+      "data_remaining": {
+        "name": "Data restante"
+      },
+      "data_used_percent": {
+        "name": "Pourcentage data"
+      },
+      "out_of_plan": {
+        "name": "Hors forfait"
+      },
+      "national_data_used": {
+        "name": "Data France"
+      },
+      "national_data_limit": {
+        "name": "Limite data France"
+      },
+      "roaming_data_used": {
+        "name": "Data etranger"
+      },
+      "roaming_data_limit": {
+        "name": "Limite data etranger"
+      },
+      "roaming_data_remaining": {
+        "name": "Data etranger restante"
+      },
+      "roaming_data_used_percent": {
+        "name": "Pourcentage data etranger"
+      },
+      "last_update": {
+        "name": "Dernier releve"
+      },
+      "next_reset_date": {
+        "name": "Prochaine remise a zero"
+      }
+    }
+  }
+}

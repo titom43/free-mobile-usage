@@ -1,0 +1,71 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Free Mobile Usage",
+        "description": "Connect the primary Free Mobile account. Family lines are added automatically.",
+        "data": {
+          "username": "Free Mobile username",
+          "password": "Free Mobile password"
+        }
+      },
+      "mfa": {
+        "title": "Free Mobile verification",
+        "description": "Enter the temporary SMS code. Home Assistant will be registered as a trusted device.",
+        "data": {
+          "code": "SMS code"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid Free Mobile credentials.",
+      "invalid_mfa": "Invalid or expired Free Mobile SMS code.",
+      "cannot_connect": "Could not connect to Free Mobile.",
+      "unknown": "Unexpected error. Check Home Assistant logs."
+    },
+    "abort": {
+      "already_configured": "This Free Mobile account is already configured.",
+      "mfa_session_expired": "The verification session expired. Start setup again."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "data_used": {
+        "name": "Data used"
+      },
+      "data_remaining": {
+        "name": "Data remaining"
+      },
+      "data_used_percent": {
+        "name": "Data used percent"
+      },
+      "out_of_plan": {
+        "name": "Out of plan"
+      },
+      "national_data_used": {
+        "name": "National data used"
+      },
+      "national_data_limit": {
+        "name": "National data limit"
+      },
+      "roaming_data_used": {
+        "name": "Roaming data used"
+      },
+      "roaming_data_limit": {
+        "name": "Roaming data limit"
+      },
+      "roaming_data_remaining": {
+        "name": "Roaming data remaining"
+      },
+      "roaming_data_used_percent": {
+        "name": "Roaming data used percent"
+      },
+      "last_update": {
+        "name": "Last update"
+      },
+      "next_reset_date": {
+        "name": "Next reset date"
+      }
+    }
+  }
+}

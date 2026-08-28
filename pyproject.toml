@@ -1,0 +1,28 @@
+[project]
+name = "free-mobile-usage"
+version = "0.1.0"
+description = "Home Assistant custom integration for Free Mobile plan usage"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "aiohttp>=3.9",
+  "beautifulsoup4==4.12.3",
+  "certifi>=2024.8.30",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+pythonpath = ["custom_components"]
+testpaths = ["tests"]

@@ -1,0 +1,13 @@
+{
+  "domain": "free_mobile_usage",
+  "name": "Free Mobile Usage",
+  "codeowners": ["@titom43"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/titom43/free-mobile-usage",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/titom43/free-mobile-usage/issues",
+  "requirements": [],
+  "version": "0.2.0"
+}
