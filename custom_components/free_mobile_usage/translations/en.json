@@ -19,6 +19,7 @@
     },
     "error": {
       "invalid_auth": "Invalid Free Mobile credentials.",
+      "account_blocked": "Free Mobile temporarily blocked this account. Wait a few minutes before trying again.",
       "invalid_mfa": "Invalid or expired Free Mobile SMS code.",
       "cannot_connect": "Could not connect to Free Mobile.",
       "unknown": "Unexpected error. Check Home Assistant logs."

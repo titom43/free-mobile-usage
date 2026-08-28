@@ -9,7 +9,14 @@ from homeassistant.const import CONF_PASSWORD
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import CONF_USERNAME, DOMAIN
-from .mobile_api import FreeMobileApiAuthError, FreeMobileApiError, FreeMobileApiMfaRequired, FreeMobileMobileApiClient, MobileApiAuthState
+from .mobile_api import (
+    FreeMobileApiAccountBlocked,
+    FreeMobileApiAuthError,
+    FreeMobileApiError,
+    FreeMobileApiMfaRequired,
+    FreeMobileMobileApiClient,
+    MobileApiAuthState,
+)
 
 
 class FreeMobileUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -42,6 +49,8 @@ class FreeMobileUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._pending_challenge = challenge
                 self._pending_data = dict(user_input)
                 return await self.async_step_mfa()
+            except FreeMobileApiAccountBlocked:
+                errors["base"] = "account_blocked"
             except FreeMobileApiAuthError:
                 errors["base"] = "invalid_auth"
             except FreeMobileApiError:
@@ -69,6 +78,8 @@ class FreeMobileUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 await self._pending_client.async_complete_mfa(self._pending_challenge, user_input["code"])
                 await self._pending_client.async_get_family_usage(self._pending_data[CONF_USERNAME])
+            except FreeMobileApiAccountBlocked:
+                errors["base"] = "account_blocked"
             except FreeMobileApiAuthError:
                 errors["base"] = "invalid_mfa"
             except FreeMobileApiError:

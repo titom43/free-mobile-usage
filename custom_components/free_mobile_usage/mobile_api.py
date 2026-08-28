@@ -32,6 +32,16 @@ class FreeMobileApiAuthError(FreeMobileApiError):
     """Credentials or a saved access token are no longer accepted."""
 
 
+class FreeMobileApiAccountBlocked(FreeMobileApiAuthError):
+    """Free Mobile has temporarily rate-limited authentication attempts."""
+
+    def __init__(self, retry_after: str | None = None) -> None:
+        message = "Free Mobile temporarily blocked this account"
+        if retry_after:
+            message = f"{message} ({retry_after})"
+        super().__init__(message)
+
+
 class FreeMobileApiMfaRequired(FreeMobileApiError):
     """A temporary SMS code is needed to complete login."""
 
@@ -167,10 +177,11 @@ class FreeMobileMobileApiClient:
                 f"{BASE_URL}{path}", headers=self._headers(service_label), timeout=TIMEOUT
             ) as response:
                 if response.status in {401, 403}:
+                    details = await _safe_error_details(response)
                     _LOGGER.warning(
                         "Free Mobile rejected an authenticated API request (HTTP %s; %s)",
                         response.status,
-                        await _safe_error_details(response),
+                        details,
                     )
                     raise FreeMobileApiAuthError("Free Mobile rejected the saved access token")
                 response.raise_for_status()
@@ -189,12 +200,15 @@ class FreeMobileMobileApiClient:
                 timeout=TIMEOUT,
             ) as response:
                 if response.status in {401, 403}:
+                    details = await _safe_error_details(response)
                     _LOGGER.warning(
                         "Free Mobile rejected API authentication for %s (HTTP %s; %s)",
                         path,
                         response.status,
-                        await _safe_error_details(response),
+                        details,
                     )
+                    if details.get("message") == "ACCOUNT_BLOCKED":
+                        raise FreeMobileApiAccountBlocked(_as_str(details.get("error")))
                     raise FreeMobileApiAuthError("Free Mobile rejected the supplied credentials or SMS code")
                 response.raise_for_status()
                 return await _response_json(response)
@@ -212,16 +226,18 @@ async def _response_json(response: aiohttp.ClientResponse) -> dict[str, Any]:
     return payload
 
 
-async def _safe_error_details(response: aiohttp.ClientResponse) -> str:
+async def _safe_error_details(response: aiohttp.ClientResponse) -> dict[str, Any]:
     """Return only generic API error metadata; never log request credentials."""
     try:
         payload = await response.json(content_type=None)
     except (aiohttp.ContentTypeError, ValueError):
-        return "non-JSON error response"
+        return {"response_type": "non_json"}
     if not isinstance(payload, dict):
-        return f"JSON {type(payload).__name__}"
-    details = {key: payload[key] for key in ("code", "error", "message", "status") if key in payload}
-    return f"fields={sorted(payload)} details={details}" if details else f"fields={sorted(payload)}"
+        return {"response_type": type(payload).__name__}
+    return {
+        "fields": sorted(payload),
+        **{key: payload[key] for key in ("code", "error", "message", "status") if key in payload},
+    }
 
 
 def _as_str(value: Any) -> str | None:
