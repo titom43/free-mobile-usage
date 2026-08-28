@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -20,6 +21,7 @@ APP_HEADERS = {
     "Accept-Language": "en-GB,en;q=0.9",
     "User-Agent": "Free/1855 CFNetwork/3896.100.1.2.1 Darwin/27.0.0",
 }
+_LOGGER = logging.getLogger(__name__)
 
 
 class FreeMobileApiError(Exception):
@@ -165,6 +167,11 @@ class FreeMobileMobileApiClient:
                 f"{BASE_URL}{path}", headers=self._headers(service_label), timeout=TIMEOUT
             ) as response:
                 if response.status in {401, 403}:
+                    _LOGGER.warning(
+                        "Free Mobile rejected an authenticated API request (HTTP %s; %s)",
+                        response.status,
+                        await _safe_error_details(response),
+                    )
                     raise FreeMobileApiAuthError("Free Mobile rejected the saved access token")
                 response.raise_for_status()
                 return await _response_json(response)
@@ -182,6 +189,12 @@ class FreeMobileMobileApiClient:
                 timeout=TIMEOUT,
             ) as response:
                 if response.status in {401, 403}:
+                    _LOGGER.warning(
+                        "Free Mobile rejected API authentication for %s (HTTP %s; %s)",
+                        path,
+                        response.status,
+                        await _safe_error_details(response),
+                    )
                     raise FreeMobileApiAuthError("Free Mobile rejected the supplied credentials or SMS code")
                 response.raise_for_status()
                 return await _response_json(response)
@@ -197,6 +210,18 @@ async def _response_json(response: aiohttp.ClientResponse) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise FreeMobileApiError("Free Mobile returned an unexpected JSON response")
     return payload
+
+
+async def _safe_error_details(response: aiohttp.ClientResponse) -> str:
+    """Return only generic API error metadata; never log request credentials."""
+    try:
+        payload = await response.json(content_type=None)
+    except (aiohttp.ContentTypeError, ValueError):
+        return "non-JSON error response"
+    if not isinstance(payload, dict):
+        return f"JSON {type(payload).__name__}"
+    details = {key: payload[key] for key in ("code", "error", "message", "status") if key in payload}
+    return f"fields={sorted(payload)} details={details}" if details else f"fields={sorted(payload)}"
 
 
 def _as_str(value: Any) -> str | None:
