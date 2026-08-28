@@ -27,6 +27,7 @@ class FreeMobileUsageCoordinator(DataUpdateCoordinator[dict[str, FreeMobileUsage
             config_entry=entry,
         )
         self.auth_state = MobileApiAuthState.from_entry_data(dict(entry.data))
+        self.entry = entry
         self.client = FreeMobileMobileApiClient(async_get_clientsession(hass), self.auth_state)
 
     async def _async_update_data(self) -> dict[str, FreeMobileUsageData]:
