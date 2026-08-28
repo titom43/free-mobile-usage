@@ -34,6 +34,9 @@ class FreeMobileUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             try:
                 await client.async_authenticate(username, user_input[CONF_PASSWORD])
+                # Do not create an entry until the returned access token has
+                # completed an actual family-line query.
+                await client.async_get_family_usage(username)
             except FreeMobileApiMfaRequired as challenge:
                 self._pending_client = client
                 self._pending_challenge = challenge
@@ -65,7 +68,7 @@ class FreeMobileUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 await self._pending_client.async_complete_mfa(self._pending_challenge, user_input["code"])
-                await self._pending_client.async_get_subscriber(self._pending_data[CONF_USERNAME])
+                await self._pending_client.async_get_family_usage(self._pending_data[CONF_USERNAME])
             except FreeMobileApiAuthError:
                 errors["base"] = "invalid_mfa"
             except FreeMobileApiError:

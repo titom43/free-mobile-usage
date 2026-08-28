@@ -97,8 +97,10 @@ class FreeMobileMobileApiClient:
         access_token = _required_str(response, "accessToken")
         # type2FA exists on trusted-device responses too. An otpId is the only
         # reliable indication that the user must supply an SMS code.
-        otp_id = _as_str(response.get("otpId"))
-        if otp_id:
+        otp_id = _otp_id(response)
+        if _requires_mfa(response):
+            if not otp_id:
+                raise FreeMobileApiError("Free Mobile requested SMS verification without a usable challenge identifier")
             raise FreeMobileApiMfaRequired(access_token, otp_id)
         self.auth_state.update(response)
 
@@ -206,3 +208,22 @@ def _required_str(payload: dict[str, Any], key: str) -> str:
     if value is None:
         raise FreeMobileApiError(f"Free Mobile response is missing {key}")
     return value
+
+
+def _otp_id(payload: dict[str, Any]) -> str | None:
+    """Accept the OTP field spellings observed across Free API versions."""
+    for key in ("otpId", "idOtp", "otp_id", "id_otp", "challengeId"):
+        value = _as_str(payload.get(key))
+        if value:
+            return value
+    return None
+
+
+def _requires_mfa(payload: dict[str, Any]) -> bool:
+    """Interpret Free's type2FA flag without treating 'false' as truthy."""
+    value = payload.get("type2FA")
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() not in {"", "0", "false", "none", "no", "disabled", "not_required"}
+    return bool(value)
