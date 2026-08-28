@@ -72,6 +72,30 @@
       "roaming_data_used_percent": {
         "name": "Pourcentage data etranger"
       },
+      "national_voice": {
+        "name": "Appels France"
+      },
+      "national_international_voice": {
+        "name": "Appels internationaux depuis France"
+      },
+      "roaming_outgoing_voice": {
+        "name": "Appels emis a l'etranger"
+      },
+      "roaming_incoming_voice": {
+        "name": "Appels recus a l'etranger"
+      },
+      "national_sms": {
+        "name": "SMS France"
+      },
+      "national_mms": {
+        "name": "MMS France"
+      },
+      "roaming_sms": {
+        "name": "SMS a l'etranger"
+      },
+      "roaming_mms": {
+        "name": "MMS a l'etranger"
+      },
       "last_update": {
         "name": "Dernier releve"
       },

@@ -72,6 +72,30 @@
       "roaming_data_used_percent": {
         "name": "Roaming data used percent"
       },
+      "national_voice": {
+        "name": "Calls in France"
+      },
+      "national_international_voice": {
+        "name": "International calls from France"
+      },
+      "roaming_outgoing_voice": {
+        "name": "Outgoing calls while roaming"
+      },
+      "roaming_incoming_voice": {
+        "name": "Incoming calls while roaming"
+      },
+      "national_sms": {
+        "name": "SMS in France"
+      },
+      "national_mms": {
+        "name": "MMS in France"
+      },
+      "roaming_sms": {
+        "name": "SMS while roaming"
+      },
+      "roaming_mms": {
+        "name": "MMS while roaming"
+      },
       "last_update": {
         "name": "Last update"
       },

@@ -22,6 +22,15 @@ class FreeMobileUsageData:
     roaming_data_used_gb: float | None = None
     roaming_data_limit_gb: float | None = None
     out_of_plan_eur: float | None = None
+    national_voice_seconds: float | None = None
+    national_international_voice_seconds: float | None = None
+    roaming_outgoing_voice_seconds: float | None = None
+    roaming_incoming_voice_seconds: float | None = None
+    national_sms: int | None = None
+    national_mms: int | None = None
+    roaming_sms: int | None = None
+    roaming_mms: int | None = None
+    # Kept for the legacy subscriber-area parser, which only exposes text summaries.
     voice_used: str | None = None
     sms_used: str | None = None
     mms_used: str | None = None
@@ -56,6 +65,8 @@ class FreeMobileUsageData:
         # The API does not document monetary units for non-zero billing fields.
         # A zero is unambiguous; a non-zero value remains unavailable.
         out_of_plan = 0.0 if billing_values and all(value == 0 for value in billing_values) else None
+        national_voice = _nested_value(consumption, "national", "consumption", "voice")
+        roaming_voice = _nested_value(consumption, "roaming", "consumption", "voice")
 
         return cls(
             line_id=line_id,
@@ -69,6 +80,20 @@ class FreeMobileUsageData:
             roaming_data_used_gb=roaming_used,
             roaming_data_limit_gb=roaming_limit,
             out_of_plan_eur=out_of_plan,
+            national_voice_seconds=_number_or_none(_nested_value(national_voice, "nationalVoiceTime")),
+            national_international_voice_seconds=_number_or_none(
+                _nested_value(national_voice, "internationalVoiceTime")
+            ),
+            roaming_outgoing_voice_seconds=_number_or_none(
+                _nested_value(roaming_voice, "roamingOutgoingVoiceTime")
+            ),
+            roaming_incoming_voice_seconds=_number_or_none(
+                _nested_value(roaming_voice, "roamingIncomingVoiceTime")
+            ),
+            national_sms=_integer_or_none(_nested_value(consumption, "national", "consumption", "sms")),
+            national_mms=_integer_or_none(_nested_value(consumption, "national", "consumption", "mms")),
+            roaming_sms=_integer_or_none(_nested_value(consumption, "roaming", "consumption", "sms")),
+            roaming_mms=_integer_or_none(_nested_value(consumption, "roaming", "consumption", "mms")),
             next_reset_date=reset,
             fetched_at=datetime.now(timezone.utc),
         )
@@ -109,6 +134,16 @@ def _nested_value(payload: dict[str, Any], *keys: str) -> Any:
             return None
         value = value.get(key)
     return value
+
+
+def _number_or_none(value: Any) -> float | None:
+    """Return a numeric API counter when present."""
+    return float(value) if isinstance(value, (int, float)) else None
+
+
+def _integer_or_none(value: Any) -> int | None:
+    """Return an integer API counter when present."""
+    return value if isinstance(value, int) else None
 
 
 def _bytes_to_gb(value: Any) -> float | None:

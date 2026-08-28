@@ -15,7 +15,7 @@ possible.
 - A separate Home Assistant device and sensor set for every family line.
 - First-class roaming sensors: roaming data used, limit, remaining, percent used, and out-of-plan amount.
 - National data sensors where the portal exposes a finite allowance.
-- Attributes for phone number, account name, voice/SMS/MMS summaries where available.
+- Call duration and SMS/MMS counters, in France and while roaming.
 - Home Assistant automations can alert on data thresholds and out-of-plan costs.
 - Telegram summary command can be added later via Home Assistant automation.
 
@@ -74,6 +74,9 @@ For each family line, the integration creates:
 - Roaming data limit
 - Roaming data remaining
 - Roaming data used percent
+- Calls in France and international calls from France
+- Outgoing and incoming calls while roaming
+- SMS and MMS in France and while roaming
 - Out of plan when Free returns an unambiguous value. A non-zero API billing
   counter is not currently exposed because its monetary unit is undocumented.
 - Next reset date

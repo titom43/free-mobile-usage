@@ -8,7 +8,7 @@ from datetime import date, datetime
 
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CURRENCY_EURO, PERCENTAGE, UnitOfInformation
+from homeassistant.const import CURRENCY_EURO, PERCENTAGE, UnitOfInformation, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -105,6 +105,62 @@ SENSORS: tuple[FreeMobileSensorDescription, ...] = (
         value_fn=lambda data: data.roaming_data_used_percent,
     ),
     FreeMobileSensorDescription(
+        key="national_voice",
+        translation_key="national_voice",
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.TOTAL,
+        value_fn=lambda data: data.national_voice_seconds,
+    ),
+    FreeMobileSensorDescription(
+        key="national_international_voice",
+        translation_key="national_international_voice",
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.TOTAL,
+        value_fn=lambda data: data.national_international_voice_seconds,
+    ),
+    FreeMobileSensorDescription(
+        key="roaming_outgoing_voice",
+        translation_key="roaming_outgoing_voice",
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.TOTAL,
+        value_fn=lambda data: data.roaming_outgoing_voice_seconds,
+    ),
+    FreeMobileSensorDescription(
+        key="roaming_incoming_voice",
+        translation_key="roaming_incoming_voice",
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.TOTAL,
+        value_fn=lambda data: data.roaming_incoming_voice_seconds,
+    ),
+    FreeMobileSensorDescription(
+        key="national_sms",
+        translation_key="national_sms",
+        state_class=SensorStateClass.TOTAL,
+        value_fn=lambda data: data.national_sms,
+    ),
+    FreeMobileSensorDescription(
+        key="national_mms",
+        translation_key="national_mms",
+        state_class=SensorStateClass.TOTAL,
+        value_fn=lambda data: data.national_mms,
+    ),
+    FreeMobileSensorDescription(
+        key="roaming_sms",
+        translation_key="roaming_sms",
+        state_class=SensorStateClass.TOTAL,
+        value_fn=lambda data: data.roaming_sms,
+    ),
+    FreeMobileSensorDescription(
+        key="roaming_mms",
+        translation_key="roaming_mms",
+        state_class=SensorStateClass.TOTAL,
+        value_fn=lambda data: data.roaming_mms,
+    ),
+    FreeMobileSensorDescription(
         key="last_update",
         translation_key="last_update",
         device_class=SensorDeviceClass.TIMESTAMP,
@@ -190,8 +246,13 @@ class FreeMobileUsageSensor(CoordinatorEntity[FreeMobileUsageCoordinator], Senso
             "roaming_data_limit_gb": data.roaming_data_limit_gb,
             "roaming_data_remaining_gb": data.roaming_data_remaining_gb,
             "roaming_data_used_percent": data.roaming_data_used_percent,
-            "voice_used": data.voice_used,
-            "sms_used": data.sms_used,
-            "mms_used": data.mms_used,
+            "national_voice_seconds": data.national_voice_seconds,
+            "national_international_voice_seconds": data.national_international_voice_seconds,
+            "roaming_outgoing_voice_seconds": data.roaming_outgoing_voice_seconds,
+            "roaming_incoming_voice_seconds": data.roaming_incoming_voice_seconds,
+            "national_sms": data.national_sms,
+            "national_mms": data.national_mms,
+            "roaming_sms": data.roaming_sms,
+            "roaming_mms": data.roaming_mms,
             "next_reset_date": data.next_reset_date.isoformat() if data.next_reset_date else None,
         }
