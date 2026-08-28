@@ -29,6 +29,17 @@
       "mfa_session_expired": "The verification session expired. Start setup again."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Free Mobile polling",
+        "description": "Choose how often plan usage is refreshed.",
+        "data": {
+          "scan_interval_hours": "Polling interval (hours)"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "data_used": {

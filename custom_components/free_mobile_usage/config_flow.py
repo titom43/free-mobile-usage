@@ -8,7 +8,12 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import CONF_USERNAME, DOMAIN
+from .const import (
+    CONF_SCAN_INTERVAL_HOURS,
+    CONF_USERNAME,
+    DEFAULT_SCAN_INTERVAL_HOURS,
+    DOMAIN,
+)
 from .mobile_api import (
     FreeMobileApiAccountBlocked,
     FreeMobileApiAuthError,
@@ -27,6 +32,12 @@ class FreeMobileUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _pending_client: FreeMobileMobileApiClient | None = None
     _pending_challenge: FreeMobileApiMfaRequired | None = None
     _pending_data: dict[str, str] | None = None
+
+    @staticmethod
+    @config_entries.callback
+    def async_get_options_flow(config_entry):
+        """Return the options flow for an existing account."""
+        return FreeMobileUsageOptionsFlow()
 
     async def async_step_user(self, user_input: dict | None = None):
         """Handle the initial step."""
@@ -93,3 +104,24 @@ class FreeMobileUsageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required("code"): str}),
             errors=errors,
         )
+
+
+class FreeMobileUsageOptionsFlow(config_entries.OptionsFlow):
+    """Manage Free Mobile Usage integration options."""
+
+    async def async_step_init(self, user_input: dict | None = None):
+        """Configure the polling interval."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_SCAN_INTERVAL_HOURS,
+                    default=self.config_entry.options.get(
+                        CONF_SCAN_INTERVAL_HOURS, DEFAULT_SCAN_INTERVAL_HOURS
+                    ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=24)),
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema)

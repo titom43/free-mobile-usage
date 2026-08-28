@@ -2,13 +2,20 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import CONF_USERNAME, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_SCAN_INTERVAL_HOURS,
+    CONF_USERNAME,
+    DEFAULT_SCAN_INTERVAL_HOURS,
+    DOMAIN,
+)
 from .mobile_api import FreeMobileApiError, FreeMobileApiMfaRequired, FreeMobileMobileApiClient, MobileApiAuthState
 from .models import FreeMobileUsageData
 
@@ -19,11 +26,14 @@ class FreeMobileUsageCoordinator(DataUpdateCoordinator[dict[str, FreeMobileUsage
     config_entry: ConfigEntry
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        scan_interval_hours = entry.options.get(
+            CONF_SCAN_INTERVAL_HOURS, DEFAULT_SCAN_INTERVAL_HOURS
+        )
         super().__init__(
             hass,
             logger=__import__("logging").getLogger(__name__),
             name=DOMAIN,
-            update_interval=DEFAULT_SCAN_INTERVAL,
+            update_interval=timedelta(hours=scan_interval_hours),
             config_entry=entry,
         )
         self.auth_state = MobileApiAuthState.from_entry_data(dict(entry.data))

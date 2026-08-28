@@ -29,6 +29,17 @@
       "mfa_session_expired": "La session de verification a expire. Recommence la configuration."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Releves Free Mobile",
+        "description": "Choisis la frequence de mise a jour des consommations.",
+        "data": {
+          "scan_interval_hours": "Intervalle de releve (heures)"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "data_used": {
