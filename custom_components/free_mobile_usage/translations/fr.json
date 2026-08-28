@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Free Mobile Usage",
+        "title": "Compte Free Mobile",
         "description": "Connecte le compte principal Free Mobile. Les lignes de la famille sont ajoutees automatiquement.",
         "data": {
           "username": "Identifiant Free Mobile",
